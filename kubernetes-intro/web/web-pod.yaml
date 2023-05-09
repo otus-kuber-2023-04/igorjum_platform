@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web
+  labels:
+    app: web
+spec:
+  containers:
+  - name: web
+    image: igorjum/hw_1-nginx-image:0.1
+    imagePullPolicy: Always
+    readinessProbe:
+      httpGet:
+        path: /
+        port: 8000
+    livenessProbe:
+      tcpSocket: { port: 8000 }
+    startupProbe:
+      httpGet:
+        path: /
+        port: 8000
+      failureThreshold: 30
+      periodSeconds: 10
+    volumeMounts:
+    - name: app
+      mountPath: /app
+  initContainers:
+  - name: init-web
+    image: busybox:1.36.0
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - name: app
+      mountPath: /app
+    command: ['sh', '-c', 'wget -O- https://tinyurl.com/otus-k8s-intro | sh']
+  volumes:
+    - name: app
+      emptyDir: {}
+      
